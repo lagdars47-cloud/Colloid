@@ -72,10 +72,11 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
             if use_internet:
                 with st.spinner("Поиск ответа"):
                     search = DuckDuckGoRun()
-                    web.results = search.incoke(user_query)
-                    context_text += f"\n\Ответ готов!:\n{web_results}"
-except Exception:
-    pass
+                    try:
+                        web.results = search.incoke(user_query)
+                        context_text += f"\n\Ответ готов!:\n{web_results}"
+                    except Exception:
+                        pass
        
             chain = prompt | llm
             def stream_generator():
