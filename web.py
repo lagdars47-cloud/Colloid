@@ -67,9 +67,12 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
             context_text = "\n".join([doc.page_content for doc in relevant_docs])
        
             chain = prompt | llm
-            response = chain.invoke({"context": context_text, "question": user_query})
+            def stream_generator():
+                for chunk in chain.stream({"context": context_text, "question": user_query}):
+                    yield chunk.content
 
-            st.markdown(response.content)
+            full_response = st.write_stream(stream_generator())
+            
             st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
 
     st.session_state.messages.append({"role": "assistant", "content": response.content})
