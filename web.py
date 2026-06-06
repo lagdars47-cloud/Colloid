@@ -59,17 +59,6 @@ for i, message in enumerate(st.session_state.messages):
         st.markdown(message["content"])
         if message["role"]=="assistant":
             st.feedback("thumbs", key=f"history_fb_{i}")
-if user_query := st.chat_input("Спроси что-нибудь про компанию..."):
-
-    with st.chat_message("user"):
-        st.markdown(user_query)
-    st.session_state.messages.append({"role": "user", "content": user_query})
-
-    with st.chat_message("assistant"):
-        context_text = "Факты из компании Colloid:\n"
-        with st.spinner("Ищу в документах..."):
-            relevant_docs = retriever.invoke(user_query)
-            context_text += "\n".join([doc.page_content for doc in relevant_docs])
 
 if use_internet:
             with st.spinner("Ищу в Википедии... 📚"):
