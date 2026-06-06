@@ -5,7 +5,6 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
-from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 
@@ -71,14 +70,14 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
             relevant_docs = retriever.invoke(user_query)
             context_text = "\n".join([doc.page_content for doc in relevant_docs])
 
-            if use_internet:
-                with st.spinner("Поиск ответа"):
-                    search = DuckDuckGoSearchRun()
-                    try:
-                        web.results = search.incoke(user_query)
-                        context_text += f"\n\Ответ готов!:\n{web_results}"
-                    except Exception:
-                        pass
+       if use_internet:
+            with st.spinner("Ищу в Википедии... 📚"):
+                try:
+                    search = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+                    web_results = search.run(user_query)
+                    context_text += f"\n\nФакты из интернета:\n{web_results}"
+                except Exception:
+                    pass
        
             chain = prompt | llm
             def stream_generator():
