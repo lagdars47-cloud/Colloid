@@ -71,7 +71,6 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
             relevant_docs = retriever.invoke(user_query)
             context_text += "\n".join([doc.page_content for doc in relevant_docs])
 
-
 if use_internet:
             with st.spinner("Ищу в Википедии... 📚"):
                 try:
@@ -83,11 +82,11 @@ if use_internet:
                     
 chain = prompt | llm   
 
-def stream_generator():
-    for chunk in chain.stream({"context": context_text, "question": user_query}):
+def stream_generator(context_to_use):
+    for chunk in chain.stream({"context": context_to_use, "question": user_query}):
         yield chunk.content
-
-full_response = st.write_stream(stream_generator())
+        
+full_response = st.write_stream(stream_generator(context_text))
             
 st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
 
