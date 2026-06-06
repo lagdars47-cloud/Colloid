@@ -80,6 +80,7 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
                     pass
         
         chain = prompt | llm
+
             def stream_generator():
                 for chunk in chain.stream({"context": context_text, "question": user_query}):
                     yield chunk.content
