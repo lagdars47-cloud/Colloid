@@ -48,10 +48,11 @@ retriever, llm, prompt = init_rag()
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-for message in st.session_state.messages:
+for i, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-
+        if message["role"]=="assistant":
+            st.feedback("thumbs", key=f"history_fb_{i}")
 if user_query := st.chat_input("Спроси что-нибудь про компанию..."):
 
     with st.chat_message("user"):
@@ -67,5 +68,6 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
             response = chain.invoke({"context": context_text, "question": user_query})
 
             st.markdown(response.content)
+            st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}"
 
     st.session_state.messages.append({"role": "assistant", "content": response.content})
