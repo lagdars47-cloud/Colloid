@@ -29,8 +29,9 @@ def init_rag():
     )
 
     template = """You are a helpful corporate assistant for "Colloid".
-    Answer the user´s question using ONLY the provided context.
-    Answer strictly in Russian language.
+    1. Answer the user´s question using the provided context.
+    2. CRITICAL: ALWAYS answer in the EXAT SAME LANGUAGE that the user used to ask the question (e.g., if asked in German, reply in German).
+    3. If the user asks to translate a text or ask a general question fulfill their request using your general knowledge.
 
     Context:
     {context}
@@ -38,7 +39,7 @@ def init_rag():
     Question:
     {question}
   
-    Answer in Russian:"""
+    Answer:"""
     prompt = PromptTemplate.from_template(template)
    
     return vectorstore.as_retriever(), llm, prompt
