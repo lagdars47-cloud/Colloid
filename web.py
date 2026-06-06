@@ -5,7 +5,7 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
-from langchain_community.tools.duckduckgo_search import DuckDuckGoSearchRun
+from langchain_community.tools import DuckDuckGoSearchRun
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Корпоративный ИИ компании Colloid")
