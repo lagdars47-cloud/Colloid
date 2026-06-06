@@ -69,6 +69,8 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
         with st.spinner("Ищу в документах..."):
             relevant_docs = retriever.invoke(user_query)
             context_text = "\n".join([doc.page_content for doc in relevant_docs])
+
+
 if use_internet:
             with st.spinner("Ищу в Википедии... 📚"):
                 try:
@@ -78,7 +80,7 @@ if use_internet:
                 except Exception:
                     pass
                     
-        chain = prompt | llm   
+chain = prompt | llm   
 
             def stream_generator():
                 for chunk in chain.stream({"context": context_text, "question": user_query}):
