@@ -77,7 +77,9 @@ if use_internet:
                     context_text += f"\n\nФакты из интернета:\n{web_results}"
                 except Exception:
                     pass
+                    
         chain = prompt | llm   
+
             def stream_generator():
                 for chunk in chain.stream({"context": context_text, "question": user_query}):
                     yield chunk.content
