@@ -82,12 +82,12 @@ if use_internet:
                     
 chain = prompt | llm   
 
-            def stream_generator():
-                for chunk in chain.stream({"context": context_text, "question": user_query}):
-                    yield chunk.content
+def stream_generator():
+    for chunk in chain.stream({"context": context_text, "question": user_query}):
+        yield chunk.content
 
-            full_response = st.write_stream(stream_generator())
+full_response = st.write_stream(stream_generator())
             
-            st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
+st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
 
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+st.session_state.messages.append({"role": "assistant", "content": full_response})
