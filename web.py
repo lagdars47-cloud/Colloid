@@ -80,14 +80,33 @@ if use_internet:
                 except Exception:
                     pass
                     
-chain = prompt | llm   
+chain = prompt | llm
 
-def stream_generator(context_to_use):
-    for chunk in chain.stream({"context": context_to_use, "question": user_query}):
+def stream_generator(context_to_use, query_to_use):
+    for chunk in chain.stream({"context": context_to_use, "question": query_to_use}):
         yield chunk.content
-        
-full_response = st.write_stream(stream_generator(context_text))
-            
-st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
 
-st.session_state.messages.append({"role": "assistant", "content": full_response})
+if user_query := st.chat_input("Ask me something..."):
+    with st.chat_message("user"):
+        st.markdown(user_query)
+        st.session_state.messages.append({"role": "user", "content": user_query})
+
+    with st.chat_message("assistant"):
+        context_text = "Facts from Colloid:\n"
+        
+        with st.spinner("Searching documents..."):
+            relevant_docs = retriever.invoke(user_query)
+            context_text += "\n".join([doc.page_content for doc in relevant_docs])
+        
+        if use_internet:
+            with st.spinner("Searching Wikipedia..."):
+                try:
+                    search = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
+                    web_results = search.run(user_query)
+                    context_text += f"\n\nFacts from internet:\n{web_results}"
+                except Exception:
+                    pass
+        
+        full_response = st.write_stream(stream_generator(context_text, user_query))
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
