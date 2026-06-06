@@ -5,5 +5,5 @@ langchain-groq
 langchain-huggingface
 sentence-transformers
 protobuf==3.20.3
-# duckduckgo-search
+duckduckgo-search
 # force update
