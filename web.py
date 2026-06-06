@@ -71,7 +71,7 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
 
             if use_internet:
                 with st.spinner("Поиск ответа"):
-                    search = DuckDuckGoSearchRun()
+                   # search = DuckDuckGoSearchRun()
                     try:
                         web.results = search.incoke(user_query)
                         context_text += f"\n\Ответ готов!:\n{web_results}"
