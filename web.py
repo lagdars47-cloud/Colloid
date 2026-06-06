@@ -68,6 +68,6 @@ if user_query := st.chat_input("Спроси что-нибудь про комп
             response = chain.invoke({"context": context_text, "question": user_query})
 
             st.markdown(response.content)
-            st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}"
+            st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
 
     st.session_state.messages.append({"role": "assistant", "content": response.content})
