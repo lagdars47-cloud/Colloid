@@ -9,7 +9,7 @@ from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
-st.title(":rat: Корпоративный ИИ компании Colloid")
+st.title(":rat: Colloid Chat")
 
 use_internet = st.sidebar.toggle("🌍 Искать в интернете", value=False)
 
