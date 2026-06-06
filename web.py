@@ -30,8 +30,9 @@ def init_rag():
 
     template = """You are a helpful corporate assistant for "Colloid".
     1. Answer the user´s question using the provided context.
-    2. CRITICAL: ALWAYS answer in the EXAT SAME LANGUAGE that the user used to ask the question (e.g., if asked in German, reply in German).
-    3. If the user asks to translate a text or ask a general question fulfill their request using your general knowledge.
+    2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
+    3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
+    4. If the user asks to translate a text or asks a general question, fulfill their request using your general knowledge.
 
     Context:
     {context}
