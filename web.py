@@ -42,7 +42,7 @@ def init_rag():
     
     llm_vision = ChatGoogleGenerativeAI(
         temperature=0.1,
-        model="gemini-1.5-flash",
+        model="gemini-1.5-flash-latest",
         google_api_key=st.secrets["GOOGLE_API_KEY"],
         safety_settings={
             HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
