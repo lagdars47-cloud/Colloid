@@ -78,8 +78,7 @@ def stream_generator(context_to_use, query_to_use):
 if user_query := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
    user_query = prompt_data.text
    attached_files = prompt_data.files
-    if not user_query:
-        
+if not user_query:
         user_query = "Посмотри приклепленные файлы и расскажи, что в них."
     with st.chat_message("user"):
         st.markdown(user_query)
