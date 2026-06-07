@@ -11,7 +11,7 @@ import base64
 from langchain_core.messages import HumanMessage, SystemMessage
 import io
 from PIL import Image
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
@@ -44,6 +44,11 @@ def init_rag():
         temperature=0.1,
         model="gemini-1.5-flash",
         google_api_key=st.secrets["GOOGLE_API_KEY"]
+        safety_settings={
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE
     )
 
     llm_text = ChatGroq(
