@@ -88,7 +88,7 @@ if user_query := st.chat_input("Спроси что-нибудь...", accept_fil
                 st.caption(f"📎 Прикреплен файл: {f.name}")
         st.session_state.messages.append({"role": "user", "content": user_query})
 
-    with st.chat_message("assistant"):
+   with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
 
         if attached_files:
