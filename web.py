@@ -47,6 +47,9 @@ def init_rag():
     3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
     4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
 
+    История нашей предыдущей переписки:
+    {chat_history}
+
     Context:
     {context}
     
@@ -72,7 +75,7 @@ for i, message in enumerate(st.session_state.messages):
 chain = prompt | llm
 
 def stream_generator(context_to_use, query_to_use):
-    for chunk in chain.stream({"context": context_to_use, "question": query_to_use}):
+    for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
         yield chunk.content
 
 if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
@@ -115,6 +118,14 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
                 context_text += f"\n\nFacts from the internet:\n{web_results}"
             except Exception:
                 pass
+
+       history_text = ""
+       for msk in st.session_state.messages[:-1][-6]:
+           role = "Пользователь" if msg["role"] == "user" else "Ассистент"
+           history_text += f"{role}: {msg['content']}\n"
+
+        if not history_text:
+            history_text = "Это начало нашего диалога, истории пока нет."
         
         full_response = st.write_stream(stream_generator(context_text, user_query))
         
