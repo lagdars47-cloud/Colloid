@@ -101,9 +101,6 @@ if user_query := st.chat_input("Спроси что-нибудь...", accept_fil
                         context_text += page.extract_text() + "\n"
                 else:
                      context_text += f"\n[СЕКРЕТНО: Пользователь прислал фото {f.name}. Скажи, что ты пока слепой, но скоро научишься смотреть картинки.]\n"
-
-        if extracted_text:
-            context_text += f"\n\nИнформация из загруженного файла:\n{extracted_text}\n"
         
         with st.spinner("Думаю и ищу информацию... 🔍"):
             try:
