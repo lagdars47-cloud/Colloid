@@ -44,7 +44,7 @@ def init_rag():
     )
 
     llm_text = ChatGroq(
-        temperature=0.5
+        temperature=0.5,
         model_name="llama-3.3-70b-versatile",
         groq_api_key=st.secrets.["GROQ_API_KEY"]
     )
