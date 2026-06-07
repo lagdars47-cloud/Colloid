@@ -74,7 +74,7 @@ for i, message in enumerate(st.session_state.messages):
 
 chain = prompt | llm
 
-def stream_generator(context_to_use, query_to_use):
+def stream_generator(context_to_use, query_to_use, history_to_use):
     for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
         yield chunk.content
 
@@ -128,7 +128,7 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
         if not history_text:
             history_text = "Это начало нашего диалога, истории пока нет."
         
-        full_response = st.write_stream(stream_generator(context_text, user_query))
+        full_response = st.write_stream(stream_generator(context_text, user_query, history_to_use))
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
