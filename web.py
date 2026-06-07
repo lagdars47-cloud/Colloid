@@ -81,7 +81,7 @@ if user_query := st.chat_input("Спроси что-нибудь...", accept_fil
     
    if not user_query:
         user_query = "Посмотри приклепленные файлы и расскажи, что в них."
-    with st.chat_message("user"):
+   with st.chat_message("user"):
         st.markdown(user_query)
         if attached_files:
             for f in attached_files:
