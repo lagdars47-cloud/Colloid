@@ -95,7 +95,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         {history_to_use}
 
         Context:
-        {Context_to_use}
+        {context_to_use}
 
         Question:
         {query_to_use}
