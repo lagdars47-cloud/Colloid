@@ -7,6 +7,8 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 from langchain_community.tools import DuckDuckGoSearchRun
 import PyPDF2
+import base64
+from langchain_core.messages import HumanMessage
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
@@ -36,8 +38,8 @@ def init_rag():
     )
     
     llm = ChatGroq(
-        temperature=0.5,
-        model_name="llama-3.3-70b-versatile",
+        temperature=0.1,
+        model_name="llama-3.2-90b-vision-preview",
         groq_api_key=st.secrets["GROQ_API_KEY"]
     )
 
@@ -46,7 +48,8 @@ def init_rag():
     2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
     3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
     4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
-
+    5. 3. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
+    
     История нашей предыдущей переписки:
     {chat_history}
 
@@ -74,9 +77,40 @@ for i, message in enumerate(st.session_state.messages):
 
 chain = prompt | llm
 
-def stream_generator(context_to_use, query_to_use, history_to_use):
-    for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
-        yield chunk.content
+def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
+    if base64_image:
+        full_prompt_text = f"""You are a helpful corporate assistant for "Colloid".
+        1. Answer the user's question using the provide context, chat history, and the attached image.
+        2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
+        3. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
+
+        История нашей предыдущей переписки:
+        {history_to_use}
+
+        Context:
+        {Context_to_use}
+
+        Question:
+        {query_to_use}
+        """
+
+        messages = [
+            HumanMessage(
+                content=[
+                    {"type", "text", "text": full_prompt_text},
+                    {
+                        "text": "image_url",
+                        "image_url": {"url": f"data:image/jpeg/;base64,{base64_image}"},
+                    },
+                ]
+            )
+        ]
+
+        for chunk in llm.stream(message):
+            yield chunk.content
+    else:
+        for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
+            yield chunk.content
 
 if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
    user_query = prompt_data.text
@@ -93,17 +127,19 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
 
    with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
+        image_b64 = None
 
         if attached_files:
             for f in attached_files:
-                if f.name.endswith(".txt"):
+                if f.name.lower().endswith((".png", ",jpg", ".jpeg")):
+                    image_b64 = base64.b64encode(f.read()).decode("utf-8")
+                    context_text += f"\n[User attached an image: {f.name}]\n"
+                elif f.name.endswith(".txt"):
                     context_text += f"\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
                 elif f.name.endswith(".pdf"):
                     pdf_reader = PyPDF2.PdfReader(f)
                     for page in pdf_reader.pages:
                         context_text += page.extract_text() + "\n"
-                else:
-                     context_text += f"\n[СЕКРЕТНО: Пользователь прислал фото {f.name}. Скажи, что ты пока слепой, но скоро научишься смотреть картинки.]\n"
         
         with st.spinner("Думаю и ищу информацию... 🔍"):
             try:
@@ -128,7 +164,7 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
         if not history_text:
             history_text = "Это начало нашего диалога, истории пока нет."
         
-        full_response = st.write_stream(stream_generator(context_text, user_query, history_text))
+        full_response = st.write_stream(stream_generator(context_text, user_query, history_text, image_b64))
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
