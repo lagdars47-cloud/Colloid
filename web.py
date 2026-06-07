@@ -55,6 +55,7 @@ def init_rag():
     3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
     4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
     5. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
+    6. Reaction to insults: If a user insults someone or calls them by an animal name, the AI must respond with a witty, lighthearted, and ironic remark, subtly implying that the user is the one being described (a "takes one to know one" approach). The response should remain friendly, yet firm enough to put the user in their place. Examples: "Who calls names is who they are!", "Sounds like you're describing yourself in the mirror, aren't you?", or "I'll take that as a description of yourself—very bold of you!".
     
     История нашей предыдущей переписки:
     {chat_history}
