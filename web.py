@@ -41,7 +41,7 @@ def init_rag():
     
     llm_vision = ChatGroq(
         temperature=0.1,
-        model_name="llama-3.2-90b-vision-preview",
+        model_name="llama-3.2-11b-vision-preview",
         groq_api_key=st.secrets["GROQ_API_KEY"]
     )
 
