@@ -105,7 +105,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
     if base64_image:
         from langchain_core.messages import HumanMessage
 
-        system_rules = f"""You are a helpful corporate assistant for "Colloid".
+        combined_text = f"""You are a helpful corporate assistant for "Colloid".
         [RULES]
         1. Answer the user's question using the provided context.
         2. Always respond in the user's language.
@@ -113,12 +113,13 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
 
         [HISTORY] {history_to_use}
         [CONTEXT] {context_to_use}
-        """
+
+        [USER QUESTION]
+        Analyze this image and answer: {query_to_use}"""
 
         clean_b64 = base64_image.split(",")[1] if "," in base64_image else base64_image
 
         messages = [
-            SystemMessage(content=system_rules),
             HumanMessage(
                 content=[
                     {"type": "text", "text": f"Analyze this image and answer: {query_to_use}"},
@@ -126,9 +127,13 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
                 ]
             )
         ]
-        
-        for chunk in llm_vision.stream(messages):
-            yield chunk.content
+
+        try:
+            for chunk in llm_vision.stream(messages):
+                yield chunk.content
+        except Exception as e:
+            yield f"❌ **Ошибка Google API:** {str(e)}"
+            
     else:
         for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
             yield chunk.content
