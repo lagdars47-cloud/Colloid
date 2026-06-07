@@ -11,6 +11,7 @@ import base64
 from langchain_core.messages import HumanMessage, SystemMessage
 import io
 from PIL import Image
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
@@ -39,10 +40,10 @@ def init_rag():
         embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     )
     
-    llm_vision = ChatGroq(
+    llm_vision = ChatGoodleGenerativeAI(
         temperature=0.1,
-        model_name="llama-3.2-11b-vision-preview",
-        groq_api_key=st.secrets["GROQ_API_KEY"]
+        model_name="gemini-1.5-flash",
+        google_api_key=st.secrets["GOOGLE_API_KEY"]
     )
 
     llm_text = ChatGroq(
@@ -96,26 +97,25 @@ chain = prompt | llm_text
 
 def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
     if base64_image:
-        clean_text = f"You are an AI assistant. Analyze the attached image and answer the user's question accurately in the user's language.\n\nUser Question: {query_to_use}"
+        from langchain_core.messages import HumanMessage
         
-        messages = [
-            HumanMessage(
-                content=[
-                    {"type": "text", "text": clean_text},
-                    {"type": "image_url", "image_url": {"url": base64_image}},
-                ]
-            )
-        ]
+        if "," in base64_image:
+            clean_b64 = base64_image.split(",")[1]
+        else:
+            clean_b64 = base64_image
+
+        message = HumanMessage(
+            content=[
+                {"type": "text", "text": f"Analyze this image and answer: {query_to_use}\n\nContext: {context_to_use}"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{clean_b64}"},
+                },
+            ]
+        )
         
-        try:
-            response = llm_vision.invoke(messages)
-            text_result = response.content
-            chunk_size = 5
-            for i in range(0, len(text_result), chunk_size):
-                yield text_result[i:i+chunk_size]
-        except Exception as e:
-            yield f"❌ **Сервер Groq отклонил запрос.** Подробности: {e}"
-            
+        for chunk in llm_vision.stream([message]):
+            yield chunk.content
     else:
         for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
             yield chunk.content
