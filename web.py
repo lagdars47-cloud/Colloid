@@ -109,6 +109,9 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         {context_to_use}
         """
         combined_text = f"{system_rules}\n\n[USER QUESTION]\n{query_to_use}"
+
+        combined_text = combined_text[:6000]
+        
         messages = [
             HumanMessage(
                 content=[
