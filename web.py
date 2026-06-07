@@ -79,7 +79,7 @@ def stream_generator(context_to_use, query_to_use):
         yield chunk.content
 
 if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
-   user_query = prompt_data.text
+   er_query = prompt_data.text
    attached_files = prompt_data.files
     
    if not user_query:
@@ -119,7 +119,7 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
             except Exception:
                 pass
 
-       history_text = ""
+         history_text = ""
 
        for msk in st.session_state.messages[:-1][-6]:
            role = "Пользователь" if msg["role"] == "user" else "Ассистент"
