@@ -94,69 +94,81 @@ chain = prompt | llm_text
 
 def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
     if base64_image:
-        st.toast("👀 Проверяю фото!", icon="👁️")
-        
-        prompt_text = f"""[SYSTEM RULES]
-        You are a multimodal vision AI assistant for "Colloid".
-        You MUST analyze the attached image and answer the user's question.
-        NEVER say you cannot see images. You CAN see them perfectly.
-        Language: Answer strictly in the same language as the User Question.
-        
-        [HISTORY]
-        {history_to_use}
-        
-        [CONTEXT]
-        {context_to_use}
-        
-        [USER QUESTION]
-        {query_to_use}
-        """
+        system_rules = f"""You are a helpful corporate assistant for "Colloid".
+        1. Answer the user's question using the provided context.
+        2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
+        3. YOU ARE A MULTIMODAL VISION AI. You CAN see images perfectly. Analyze the attached image carefully and fulfill the user's request. NEVER say you cannot see images.
+        4. Reaction to insults: If a user insults someone or calls them by an animal name, the AI must respond with a witty, ironic, and friendly retort, implying the user is describing themselves.
+           - VARIETY: Never repeat the same phrase twice. Use different styles: sarcastic, playful, philosophical, or witty.
+           - TONE: Maintain a friendly, "teacher-like" or "sassy friend" persona.
 
+        История нашей предыдущей переписки:
+        {history_to_use}
+
+        Context:
+        {context_to_use}
+        """
+        
         messages = [
+            SystemMessage(content=system_rules),
             HumanMessage(
                 content=[
                     {"type": "text", "text": query_to_use},
-                    {"text": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                    },
                 ]
             )
         ]
-
-        for chunk in llm_vision.stream(message):
+        
+        for chunk in llm_vision.stream(messages):
             yield chunk.content
     else:
         for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
             yield chunk.content
 
-if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
+
+history_text = ""
+for msg in st.session_state.messages[:-1][-6:]:
+    role = "Пользователь" if msg["role"] == "user" else "Ассистент"
+    history_text += f"{role}: {msg['content']}\n"
+
+if not history_text:
+    history_text = "Это начало нашего диалога, истории пока нет."
+
+
+if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple"):
     user_query = prompt_data.text
     attached_files = prompt_data.files
     
     if not user_query:
-       user_query = "Посмотри приклепленные файлы и расскажи, что в них."
+        user_query = "Посмотри прикрепленные файлы и расскажи, что в них."
+    
     st.session_state.messages.append({"role": "user", "content": user_query})
+    
     with st.chat_message("user"):
         st.markdown(user_query)
         if attached_files:
             for f in attached_files:
-                st.caption(f"📎 Прикреплен файл: {f.name}")
-        st.session_state.messages.append({"role": "user", "content": user_query})
+                st.caption(f"Прикреплен файл: {f.name}")
 
     with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
         image_b64 = None
-
+        
         if attached_files:
             for f in attached_files:
-                if f.name.lower().endswith((".png", ",jpg", ".jpeg")):
+                if f.name.lower().endswith((".png", ".jpg", ".jpeg")):
                     image_b64 = base64.b64encode(f.getvalue()).decode("utf-8")
                     context_text += f"\n[User attached an image: {f.name}]\n"
                 elif f.name.endswith(".txt"):
-                    context_text += f"\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
+                    context_text += f"\nСодержимое файла {f.name}:\n{f.getvalue().decode('utf-8')}\n"
                 elif f.name.endswith(".pdf"):
                     pdf_reader = PyPDF2.PdfReader(f)
                     for page in pdf_reader.pages:
                         context_text += page.extract_text() + "\n"
-        
+
         with st.spinner("Думаю и ищу информацию... 🔍"):
             try:
                 relevant_docs = retriever.invoke(user_query)
@@ -171,16 +183,7 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
             except Exception:
                 pass
 
-        history_text = ""
-
-        for msg in st.session_state.messages[:-1][-6:]:
-            role = "Пользователь" if msg["role"] == "user" else "Ассистент"
-            history_text += f"{role}: {msg['content']}\n"
-
-        if not history_text:
-            history_text = "Это начало нашего диалога, истории пока нет."
-            
         full_response = st.write_stream(stream_generator(context_text, user_query, history_text, image_b64))
         
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
-        st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
+    st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
