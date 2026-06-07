@@ -58,14 +58,14 @@ def init_rag():
     4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
     5. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
     6. Reaction to insults: If a user insults someone or calls them by an animal name, the AI must respond with a witty, ironic, and friendly retort, implying the user is describing themselves.
-   - VARIETY: Never repeat the same phrase twice. Use different styles: sarcastic, playful, philosophical, or witty.
-   - TONE: Maintain a friendly, "teacher-like" or "sassy friend" persona. 
-   - EXAMPLES OF VARIETY: 
-     * "I see you've brought a mirror into this conversation."
-     * "That's a bold way to introduce yourself!"
-     * "I think you might be talking about your own reflection."
-     * "Interesting choice of words—I suspect you know more about that than I do."
-     * "Your descriptive skills are quite… self-reflective today!"
+       - VARIETY: Never repeat the same phrase twice. Use different styles: sarcastic, playful, philosophical, or witty.
+       - TONE: Maintain a friendly, "teacher-like" or "sassy friend" persona. 
+       - EXAMPLES OF VARIETY: 
+         * "I see you've brought a mirror into this conversation."
+         * "That's a bold way to introduce yourself!"
+         * "I think you might be talking about your own reflection."
+         * "Interesting choice of words—I suspect you know more about that than I do."
+         * "Your descriptive skills are quite… self-reflective today!"
     
     История нашей предыдущей переписки:
     {chat_history}
@@ -96,42 +96,29 @@ chain = prompt | llm_text
 
 def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
     if base64_image:
-        system_rules = f"""You are a helpful corporate assistant for "Colloid".
-        1. Answer the user's question using the provided context.
-        2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
-        3. YOU ARE A MULTIMODAL VISION AI. You CAN see images perfectly. Analyze the attached image carefully and fulfill the user's request. NEVER say you cannot see images.
-        4. Reaction to insults: If a user insults someone or calls them by an animal name, the AI must respond with a witty, ironic, and friendly retort, implying the user is describing themselves.
-           - VARIETY: Never repeat the same phrase twice. Use different styles: sarcastic, playful, philosophical, or witty.
-           - TONE: Maintain a friendly, "teacher-like" or "sassy friend" persona.
-
-        [HISTORY]
-        {history_to_use}
-
-        [CONTEXT]
-        {context_to_use}
-        """
-        combined_text = f"{system_rules}\n\n[USER QUESTION]\n{query_to_use}"
-
-        combined_text = combined_text[:4000]
+        clean_text = f"You are an AI assistant. Analyze the attached image and answer the user's question accurately in the user's language.\n\nUser Question: {query_to_use}"
         
         messages = [
             HumanMessage(
                 content=[
-                    {"type": "text", "text": combined_text},
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": base64_image},
-                    },
+                    {"type": "text", "text": clean_text},
+                    {"type": "image_url", "image_url": {"url": base64_image}},
                 ]
             )
         ]
         
-        for chunk in llm_vision.stream(messages):
-            yield chunk.content
+        try:
+            response = llm_vision.invoke(messages)
+            text_result = response.content
+            chunk_size = 5
+            for i in range(0, len(text_result), chunk_size):
+                yield text_result[i:i+chunk_size]
+        except Exception as e:
+            yield f"❌ **Сервер Groq отклонил запрос.** Подробности: {e}"
+            
     else:
         for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
             yield chunk.content
-
 
 history_text = ""
 for msg in st.session_state.messages[:-1][-6:]:
@@ -140,7 +127,6 @@ for msg in st.session_state.messages[:-1][-6:]:
 
 if not history_text:
     history_text = "Это начало нашего диалога, истории пока нет."
-
 
 if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple"):
     user_query = prompt_data.text
@@ -168,20 +154,23 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
                     try:
                         image_bytes = f.getvalue()
                         img = Image.open(io.BytesIO(image_bytes))
-                        if img.mode !='RGB':
-                            img - img.convert('RGB')
-                        img.thumbnail((800,800))
+                        
+                        if img.mode != 'RGB':
+                            img = img.convert('RGB')
+                            
+                        img.thumbnail((800, 800))
+                        
                         buffered = io.BytesIO()
                         img.save(buffered, format="JPEG", quality=85)
                         base64_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                        
                         image_b64 = f"data:image/jpeg;base64,{base64_str}"
                         context_text += f"\n[User attached an image: {f.name}]\n"
                     except Exception as e:
                         st.error(f"Ошибка при обработке картинки: {e}")
-                    
-                elif f.name.endswith(".txt"):
+                elif ext.endswith(".txt"):
                     context_text += f"\nСодержимое файла {f.name}:\n{f.getvalue().decode('utf-8')}\n"
-                elif f.name.endswith(".pdf"):
+                elif ext.endswith(".pdf"):
                     pdf_reader = PyPDF2.PdfReader(f)
                     for page in pdf_reader.pages:
                         context_text += page.extract_text() + "\n"
