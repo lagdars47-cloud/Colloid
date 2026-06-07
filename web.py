@@ -97,7 +97,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         messages = [
             HumanMessage(
                 content=[
-                    {"type", "text", "text": full_prompt_text},
+                    {"type": "text", "text": full_prompt_text},
                     {
                         "text": "image_url",
                         "image_url": {"url": f"data:image/jpeg/;base64,{base64_image}"},
