@@ -79,7 +79,7 @@ def stream_generator(context_to_use, query_to_use):
         yield chunk.content
 
 if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
-   er_query = prompt_data.text
+   user_query = prompt_data.text
    attached_files = prompt_data.files
     
    if not user_query:
