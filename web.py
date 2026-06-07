@@ -119,19 +119,20 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
             yield chunk.content
 
 if prompt_data := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
-   user_query = prompt_data.text
-   attached_files = prompt_data.files
+    user_query = prompt_data.text
+    attached_files = prompt_data.files
     
-   if not user_query:
-        user_query = "Посмотри приклепленные файлы и расскажи, что в них."
-   with st.chat_message("user"):
+    if not user_query:
+       user_query = "Посмотри приклепленные файлы и расскажи, что в них."
+    st.session_state.messages.append({"role": "user", "content": user_query})
+    with st.chat_message("user"):
         st.markdown(user_query)
         if attached_files:
             for f in attached_files:
                 st.caption(f"📎 Прикреплен файл: {f.name}")
         st.session_state.messages.append({"role": "user", "content": user_query})
 
-   with st.chat_message("assistant"):
+    with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
         image_b64 = None
 
