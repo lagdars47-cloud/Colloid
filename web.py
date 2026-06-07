@@ -44,7 +44,7 @@ def init_rag():
     )
 
     llm_text = ChatGroq(
-        temperature=0.5,
+        temperature=0.7,
         model_name="llama-3.3-70b-versatile",
         groq_api_key=st.secrets["GROQ_API_KEY"]
     )
@@ -55,7 +55,15 @@ def init_rag():
     3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
     4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
     5. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
-    6. Reaction to insults: If a user insults someone or calls them by an animal name, the AI must respond with a witty, lighthearted, and ironic remark, subtly implying that the user is the one being described (a "takes one to know one" approach). The response should remain friendly, yet firm enough to put the user in their place. Examples: "Who calls names is who they are!", "Sounds like you're describing yourself in the mirror, aren't you?", or "I'll take that as a description of yourself—very bold of you!".
+    6. Reaction to insults: If a user insults someone or calls them by an animal name, the AI must respond with a witty, ironic, and friendly retort, implying the user is describing themselves.
+   - VARIETY: Never repeat the same phrase twice. Use different styles: sarcastic, playful, philosophical, or witty.
+   - TONE: Maintain a friendly, "teacher-like" or "sassy friend" persona. 
+   - EXAMPLES OF VARIETY: 
+     * "I see you've brought a mirror into this conversation."
+     * "That's a bold way to introduce yourself!"
+     * "I think you might be talking about your own reflection."
+     * "Interesting choice of words—I suspect you know more about that than I do."
+     * "Your descriptive skills are quite… self-reflective today!"
     
     История нашей предыдущей переписки:
     {chat_history}
