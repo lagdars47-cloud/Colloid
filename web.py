@@ -54,7 +54,7 @@ def init_rag():
     2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
     3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
     4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
-    5. 3. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
+    5. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
     
     История нашей предыдущей переписки:
     {chat_history}
@@ -89,7 +89,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         1. Answer the user's question using the provide context, chat history, and the attached image.
         2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
         3. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
-        4. 3. CRITICAL VISION INSTRUCTION: You ARE a multimodal vision AI. You CAN see and analyze the attached image perfectly. Read text, fix errors, and describe the image. NEVER output that you cannot see or analyze images.
+        4. CRITICAL VISION INSTRUCTION: You ARE a multimodal vision AI. You CAN see and analyze the attached image perfectly. Read text, fix errors, and describe the image. NEVER output that you cannot see or analyze images.
         
         История нашей предыдущей переписки:
         {history_to_use}
@@ -102,9 +102,10 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         """
 
         messages = [
+            SystemMessage(content=system_rules),
             HumanMessage(
                 content=[
-                    {"type": "text", "text": full_prompt_text},
+                    {"type": "text", "text": query_to_use},
                     {
                         "text": "image_url",
                         "image_url": {"url": f"data:image/jpeg/;base64,{base64_image}"},
