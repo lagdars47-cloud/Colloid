@@ -6,6 +6,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 from langchain_community.tools import DuckDuckGoSearchRun
+import PyPDF2
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
