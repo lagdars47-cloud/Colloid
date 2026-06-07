@@ -94,7 +94,7 @@ if user_query := st.chat_input("Спроси что-нибудь...", accept_fil
         if attached_files:
             for f in attached_files:
                 if f.name.endswith(".txt"):
-                    context_text += f'\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
+                    context_text += f"\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
                 elif f.name.endswith(".pdf"):
                     pdf_reader = PyPDF2.PdfReader(f)
                     for page in pdf_reader.pages:
