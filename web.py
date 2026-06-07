@@ -121,9 +121,9 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
 
         history_text = ""
 
-       for msk in st.session_state.messages[:-1][-6]:
-           role = "Пользователь" if msg["role"] == "user" else "Ассистент"
-           history_text += f"{role}: {msg['content']}\n"
+        for msk in st.session_state.messages[:-1][-6]:
+            role = "Пользователь" if msg["role"] == "user" else "Ассистент"
+            history_text += f"{role}: {msg['content']}\n"
 
         if not history_text:
             history_text = "Это начало нашего диалога, истории пока нет."
