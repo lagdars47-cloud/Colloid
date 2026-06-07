@@ -127,7 +127,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
             )
         ]
         
-        for chunk in llm_vision.stream([message]):
+        for chunk in llm_vision.stream([messages]):
             yield chunk.content
     else:
         for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
