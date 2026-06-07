@@ -37,10 +37,16 @@ def init_rag():
         embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     )
     
-    llm = ChatGroq(
+    llm_vision = ChatGroq(
         temperature=0.1,
         model_name="llama-3.2-90b-vision-preview",
         groq_api_key=st.secrets["GROQ_API_KEY"]
+    )
+
+    llm_text = ChatGroq(
+        temperature=0.5
+        model_name="llama-3.3-70b-versatile",
+        groq_api_key=st.secrets.["GROQ_API_KEY"]
     )
 
     template = """You are a helpful corporate assistant for "Colloid".
@@ -62,9 +68,9 @@ def init_rag():
     Answer:"""
     prompt = PromptTemplate.from_template(template)
     
-    return vectorstore.as_retriever(), llm, prompt
+    return vectorstore.as_retriever(), llm_text, llm_vision, prompt
 
-retriever, llm, prompt = init_rag()
+retriever, llm_text, llm_vision, prompt = init_rag()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -75,7 +81,7 @@ for i, message in enumerate(st.session_state.messages):
         if message["role"] == "assistant":
             st.feedback("thumbs", key=f"history_fb_{i}")
 
-chain = prompt | llm
+chain = prompt | llm_text
 
 def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
     if base64_image:
@@ -106,7 +112,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
             )
         ]
 
-        for chunk in llm.stream(message):
+        for chunk in llm_vision.stream(message):
             yield chunk.content
     else:
         for chunk in chain.stream({"context": context_to_use, "question": query_to_use, "chat_history": history_to_use}):
