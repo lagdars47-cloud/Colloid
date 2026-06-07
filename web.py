@@ -171,11 +171,6 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
         if not history_text:
             history_text = "Это начало нашего диалога, истории пока нет."
             
-        if image_b64:
-            st.success(f"Система: Картинка успешно прочитана! Длина кода: {len(image_b64)} символов.")
-        else:
-            st.error("Система: Переменная image_b64 ПУСТАЯ! Картинка потерялась.")
-            
         full_response = st.write_stream(stream_generator(context_text, user_query, history_text, image_b64))
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
