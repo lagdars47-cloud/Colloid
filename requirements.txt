@@ -8,3 +8,4 @@ protobuf==3.20.3
 duckduckgo-search
 # force update
 PyPDF2
+langchain-google-genai
