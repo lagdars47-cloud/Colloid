@@ -10,6 +10,17 @@ import PyPDF2
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
+uploaded_file = st.sidebar.file_uploader("📎 Загрузить документ", type=["txt", "pdf"])
+extracted_text = ""
+
+if uploaded_file is not None:
+    if uploaded_file.name.endswith(".txt"):
+        extracted_text = uploaded_file.read().decode("utf-8")
+    elif uploaded_file.name.endswith(".pdf"):
+        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+        for page in pdf_reader.pages:
+            extracted_text += page.extract_text() + "\n"
+    st.sidebar.success(f"файл {uploaded_file.name} прочитан!")
 
 @st.cache_resource
 def init_rag():
@@ -71,6 +82,9 @@ if user_query := st.chat_input("Спроси что-нибудь..."):
 
     with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
+
+        if extracted_text:
+            context_text += f"\n\nИнформация из загруженного файла:\n{extracted_text}\n"
         
         with st.spinner("Думаю и ищу информацию... 🔍"):
             # 1. Ищем во внутренних документах
