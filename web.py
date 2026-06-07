@@ -9,6 +9,8 @@ from langchain_community.tools import DuckDuckGoSearchRun
 import PyPDF2
 import base64
 from langchain_core.messages import HumanMessage, SystemMessage
+import io
+from PIL import Image
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
@@ -110,7 +112,7 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         """
         combined_text = f"{system_rules}\n\n[USER QUESTION]\n{query_to_use}"
 
-        combined_text = combined_text[:6000]
+        combined_text = combined_text[:4000]
         
         messages = [
             HumanMessage(
@@ -163,10 +165,20 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
             for f in attached_files:
                 ext = f.name.lower()
                 if ext.endswith((".png", ".jpg", ".jpeg")):
-                    mime_type = "image/png" if ext.endswith(".png") else "image/jpeg"
-                    base64_str = base64.b64encode(f.getvalue()).decode("utf-8")
-                    image_b64 = f"data:{mime_type};base64,{base64_str}"
-                    context_text += f"\n[User attached an image: {f.name}]\n"
+                    try:
+                        image_bytes = f.getvalue()
+                        img = Image.open(io.BytesIO(image_bytes))
+                        if img.mode !='RGB':
+                            img - img.convert('RGB')
+                        img.thumbnail((800,800))
+                        buffered = io.BytesIO()
+                        img.save(buffered, format="JPEG", quality=85)
+                        base64_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                        image_b64 = f"data:image/jpeg;base64,{base64_str}"
+                        context_text += f"\n[User attached an image: {f.name}]\n"
+                    except Exception as e:
+                        st.error(f"Ошибка при обработке картинки: {e}")
+                    
                 elif f.name.endswith(".txt"):
                     context_text += f"\nСодержимое файла {f.name}:\n{f.getvalue().decode('utf-8')}\n"
                 elif f.name.endswith(".pdf"):
