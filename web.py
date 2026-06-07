@@ -40,7 +40,7 @@ def init_rag():
         embedding=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     )
     
-    llm_vision = ChatGoodleGenerativeAI(
+    llm_vision = ChatGoogleGenerativeAI(
         temperature=0.1,
         model_name="gemini-1.5-flash",
         google_api_key=st.secrets["GOOGLE_API_KEY"]
@@ -98,21 +98,28 @@ chain = prompt | llm_text
 def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
     if base64_image:
         from langchain_core.messages import HumanMessage
-        
-        if "," in base64_image:
-            clean_b64 = base64_image.split(",")[1]
-        else:
-            clean_b64 = base64_image
 
-        message = HumanMessage(
-            content=[
-                {"type": "text", "text": f"Analyze this image and answer: {query_to_use}\n\nContext: {context_to_use}"},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{clean_b64}"},
-                },
-            ]
-        )
+        system_rules = f"""You are a helpful corporate assistant for "Colloid".
+        [RULES]
+        1. Answer the user's question using the provided context.
+        2. Always respond in the user's language.
+        3. Reaction to insults: If a user insults someone or calls the, by an animal name, respond with a witty, ironic, and friendly report, implying the user is describing themselves.
+
+        [HISTORY] {history_to_use}
+        [CONTEXT] {context_to_use}
+        """
+
+        clean_b64 = base64_image.split(",")[1] if "," in base64_image else base64_image
+
+        messages = [
+            SystemMessage(content=system_rules),
+            HumanMessage(
+                content=[
+                    {"type": "text", "text": f"Analyze this image and answer: {query_to_use}"},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{clean_b64}"}},
+                ]
+            )
+        ]
         
         for chunk in llm_vision.stream([message]):
             yield chunk.content
