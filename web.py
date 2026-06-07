@@ -42,13 +42,13 @@ def init_rag():
     
     llm_vision = ChatGoogleGenerativeAI(
         temperature=0.1,
-        model_name="gemini-1.5-flash",
+        model="gemini-1.5-flash",
         google_api_key=st.secrets["GOOGLE_API_KEY"]
     )
 
     llm_text = ChatGroq(
         temperature=0.5,
-        model_name="llama-3.3-70b-versatile",
+        model="llama-3.3-70b-versatile",
         groq_api_key=st.secrets["GROQ_API_KEY"]
     )
 
