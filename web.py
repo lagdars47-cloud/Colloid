@@ -36,7 +36,7 @@ def init_rag():
     )
     
     llm = ChatGroq(
-        temperature=0.4, # Чуть поднял температуру, чтобы бот был креативнее и лучше шутил
+        temperature=0.5,
         model_name="llama-3.3-70b-versatile",
         groq_api_key=st.secrets["GROQ_API_KEY"]
     )
@@ -75,26 +75,41 @@ def stream_generator(context_to_use, query_to_use):
     for chunk in chain.stream({"context": context_to_use, "question": query_to_use}):
         yield chunk.content
 
-if user_query := st.chat_input("Спроси что-нибудь..."):
+if user_query := st.chat_input("Спроси что-нибудь...", accept_file="multiple", file_type=["jpg", "pdf", "png", "txt"]):
+   user_query = prompt_data.text
+   attached_files = prompt_data.files
+    if not user_query:
+        user_query = "Посмотри приклепленные файлы и расскажи, что в них."
     with st.chat_message("user"):
         st.markdown(user_query)
+        if attached_files:
+            st.caption(f"📎 Прикреплен файл: {f.name}")
         st.session_state.messages.append({"role": "user", "content": user_query})
 
     with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
 
+        if attached_files:
+            for f in attached_ files:
+                if f.name.endswith(".txt"):
+                    context_text += f'\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
+                elif f.name.endswith(".pdf"):
+                    pdf_reader = PyPDF2.PdfReader(f)
+                    for page in pdf_reader.pages:
+                        context_text += page.extract_text() + "\n"
+                else:
+                     context_text += f"\n[СЕКРЕТНО: Пользователь прислал фото {f.name}. Скажи, что ты пока слепой, но скоро научишься смотреть картинки.]\n"
+
         if extracted_text:
             context_text += f"\n\nИнформация из загруженного файла:\n{extracted_text}\n"
         
         with st.spinner("Думаю и ищу информацию... 🔍"):
-            # 1. Ищем во внутренних документах
             try:
                 relevant_docs = retriever.invoke(user_query)
                 context_text += "\n".join([doc.page_content for doc in relevant_docs])
             except Exception:
                 pass
             
-            # 2. Всегда ищем в интернете для актуальности и рофлов
             try:
                 search = DuckDuckGoSearchRun()
                 web_results = search.run(user_query)
@@ -102,7 +117,6 @@ if user_query := st.chat_input("Спроси что-нибудь..."):
             except Exception:
                 pass
         
-        # 3. Печатаем ответ в реальном времени
         full_response = st.write_stream(stream_generator(context_text, user_query))
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
