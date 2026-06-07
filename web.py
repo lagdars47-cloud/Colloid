@@ -102,15 +102,14 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
            - VARIETY: Never repeat the same phrase twice. Use different styles: sarcastic, playful, philosophical, or witty.
            - TONE: Maintain a friendly, "teacher-like" or "sassy friend" persona.
 
-        История нашей предыдущей переписки:
+        [HISTORY]
         {history_to_use}
 
-        Context:
+        [CONTEXT]
         {context_to_use}
         """
-        
+        combined_text = f"[system_rules}\n\n[USER QUESTION]\n{query_to_use}"
         messages = [
-            SystemMessage(content=system_rules),
             HumanMessage(
                 content=[
                     {"type": "text", "text": query_to_use},
