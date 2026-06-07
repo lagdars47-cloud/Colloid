@@ -92,7 +92,7 @@ if user_query := st.chat_input("Спроси что-нибудь...", accept_fil
         context_text = "Facts from Colloid:\n"
 
         if attached_files:
-            for f in attached_ files:
+            for f in attached_files:
                 if f.name.endswith(".txt"):
                     context_text += f'\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
                 elif f.name.endswith(".pdf"):
