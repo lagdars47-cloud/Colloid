@@ -85,31 +85,29 @@ chain = prompt | llm_text
 
 def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=None):
     if base64_image:
-        full_prompt_text = f"""You are a helpful corporate assistant for "Colloid".
-        1. Answer the user's question using the provide context, chat history, and the attached image.
-        2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
-        3. If the user asks to analyze an image, extract text, fix errors, or answer questions from it, fulfill their request accurately using your vision capabilities and internet context.
-        4. CRITICAL VISION INSTRUCTION: You ARE a multimodal vision AI. You CAN see and analyze the attached image perfectly. Read text, fix errors, and describe the image. NEVER output that you cannot see or analyze images.
+        st.toast("👀 Проверяю фото!", icon="👁️")
         
-        История нашей предыдущей переписки:
+        prompt_text = f"""[SYSTEM RULES]
+        You are a multimodal vision AI assistant for "Colloid".
+        You MUST analyze the attached image and answer the user's question.
+        NEVER say you cannot see images. You CAN see them perfectly.
+        Language: Answer strictly in the same language as the User Question.
+        
+        [HISTORY]
         {history_to_use}
-
-        Context:
+        
+        [CONTEXT]
         {context_to_use}
-
-        Question:
+        
+        [USER QUESTION]
         {query_to_use}
         """
 
         messages = [
-            SystemMessage(content=system_rules),
             HumanMessage(
                 content=[
                     {"type": "text", "text": query_to_use},
-                    {
-                        "text": "image_url",
-                        "image_url": {"url": f"data:image/jpeg/;base64,{base64_image}"},
-                    },
+                    {"text": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}},
                 ]
             )
         ]
@@ -140,7 +138,7 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
         if attached_files:
             for f in attached_files:
                 if f.name.lower().endswith((".png", ",jpg", ".jpeg")):
-                    image_b64 = base64.b64encode(f.read()).decode("utf-8")
+                    image_b64 = base64.b64encode(f.getvalue()).decode("utf-8")
                     context_text += f"\n[User attached an image: {f.name}]\n"
                 elif f.name.endswith(".txt"):
                     context_text += f"\nСодержимое файла {f.name}:\n{f.read().decode('utf-8')}\n"
