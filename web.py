@@ -5,19 +5,16 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
-from langchain_community.tools import WikipediaQueryRun
-from langchain_community.utilities import WikipediaAPIWrapper
+from langchain_community.tools import DuckDuckGoSearchRun
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 st.title(":rat: Colloid Chat")
-
-use_internet = st.sidebar.toggle("🌍 Инет доступ", value=False)
 
 @st.cache_resource
 def init_rag():
     loader = TextLoader("company_rules.txt", encoding="utf-8")
     docs = loader.load()
-   
+    
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
     splits = text_splitter.split_documents(docs)
 
@@ -27,26 +24,26 @@ def init_rag():
     )
     
     llm = ChatGroq(
-        temperature=0.3,
+        temperature=0.4, # Чуть поднял температуру, чтобы бот был креативнее и лучше шутил
         model_name="llama-3.3-70b-versatile",
         groq_api_key=st.secrets["GROQ_API_KEY"]
     )
 
     template = """You are a helpful corporate assistant for "Colloid".
-    1. Answer the user´s question using the provided context.
+    1. Answer the user's question using the provided context.
     2. CRITICAL: Identify the language of the user's Question. You MUST output your final Answer entirely in that EXACT SAME language.
     3. If the provided Context is in a different language than the user's Question, TRANSLATE the facts from the Context into the user's language before answering.
-    4. If the user asks to translate a text or asks a general question, fulfill their request using your general knowledge.
+    4. If the user asks to translate a text, tell a joke, or asks a general question, fulfill their request using your general knowledge and the internet context. Feel free to be natural and conversational.
 
     Context:
     {context}
-  
+    
     Question:
     {question}
-  
+    
     Answer:"""
     prompt = PromptTemplate.from_template(template)
-   
+    
     return vectorstore.as_retriever(), llm, prompt
 
 retriever, llm, prompt = init_rag()
@@ -57,25 +54,16 @@ if "messages" not in st.session_state:
 for i, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        if message["role"]=="assistant":
+        if message["role"] == "assistant":
             st.feedback("thumbs", key=f"history_fb_{i}")
 
-if use_internet:
-            with st.spinner("Ищу в Википедии... 📚"):
-                try:
-                    search = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-                    web_results = search.run(user_query)
-                    context_text += f"\n\nФакты из интернета:\n{web_results}"
-                except Exception:
-                    pass
-                    
 chain = prompt | llm
 
 def stream_generator(context_to_use, query_to_use):
     for chunk in chain.stream({"context": context_to_use, "question": query_to_use}):
         yield chunk.content
 
-if user_query := st.chat_input("Ask me something..."):
+if user_query := st.chat_input("Спроси что-нибудь..."):
     with st.chat_message("user"):
         st.markdown(user_query)
         st.session_state.messages.append({"role": "user", "content": user_query})
@@ -83,19 +71,24 @@ if user_query := st.chat_input("Ask me something..."):
     with st.chat_message("assistant"):
         context_text = "Facts from Colloid:\n"
         
-        with st.spinner("Searching documents..."):
-            relevant_docs = retriever.invoke(user_query)
-            context_text += "\n".join([doc.page_content for doc in relevant_docs])
+        with st.spinner("Думаю и ищу информацию... 🔍"):
+            # 1. Ищем во внутренних документах
+            try:
+                relevant_docs = retriever.invoke(user_query)
+                context_text += "\n".join([doc.page_content for doc in relevant_docs])
+            except Exception:
+                pass
+            
+            # 2. Всегда ищем в интернете для актуальности и рофлов
+            try:
+                search = DuckDuckGoSearchRun()
+                web_results = search.run(user_query)
+                context_text += f"\n\nFacts from the internet:\n{web_results}"
+            except Exception:
+                pass
         
-        if use_internet:
-            with st.spinner("Searching Wikipedia..."):
-                try:
-                    search = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
-                    web_results = search.run(user_query)
-                    context_text += f"\n\nFacts from internet:\n{web_results}"
-                except Exception:
-                    pass
-        
+        # 3. Печатаем ответ в реальном времени
         full_response = st.write_stream(stream_generator(context_text, user_query))
+        
         st.session_state.messages.append({"role": "assistant", "content": full_response})
         st.feedback("thumbs", key=f"new_fb_{len(st.session_state.messages)}")
