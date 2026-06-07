@@ -119,7 +119,7 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
             except Exception:
                 pass
 
-history_text = ""
+       history_text = ""
 
        for msk in st.session_state.messages[:-1][-6]:
            role = "Пользователь" if msg["role"] == "user" else "Ассистент"
