@@ -112,10 +112,10 @@ def stream_generator(context_to_use, query_to_use, history_to_use, base64_image=
         messages = [
             HumanMessage(
                 content=[
-                    {"type": "text", "text": query_to_use},
+                    {"type": "text", "text": combined_text},
                     {
                         "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                        "image_url": {"url": base64_image},
                     },
                 ]
             )
@@ -158,8 +158,11 @@ if prompt_data := st.chat_input("Спроси что-нибудь...", accept_fi
         
         if attached_files:
             for f in attached_files:
-                if f.name.lower().endswith((".png", ".jpg", ".jpeg")):
-                    image_b64 = base64.b64encode(f.getvalue()).decode("utf-8")
+                ext = f.name.lower()
+                if ext.endswith((".png", ".jpg", ".jpeg")):
+                    mime_type = "image/png" if ext.endswith(".png") else "image/jpeg"
+                    base64_str = base64.b64encode(f.getvalue()).decode("utf-8")
+                    image_b64 = f"data:{mime_type};base64,{base64_str}"
                     context_text += f"\n[User attached an image: {f.name}]\n"
                 elif f.name.endswith(".txt"):
                     context_text += f"\nСодержимое файла {f.name}:\n{f.getvalue().decode('utf-8')}\n"
