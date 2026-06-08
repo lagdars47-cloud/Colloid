@@ -37,6 +37,8 @@ def init_analytics_and_cookies():
             }
             requests.post(url, json=payload, timeout=2)
         except Exception:
+            pass
+            
     if "cookies_accepted" not in st.session_state:
         st.session_state.cookies_accepted = False
 
