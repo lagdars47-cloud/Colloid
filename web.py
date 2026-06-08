@@ -16,21 +16,32 @@ import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
 def inject_analytics_and_cookies():
-    GA_ID = "G-KZPZR173W4"
-    cookie_script = """<script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/fb18b16fd53e6b7cda3eb0175ce0e0f5.js"></script>"""
-    ga_script = f"""
-    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+    js_code = """
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){{dataLayer.push(arguments);}}
-        gtag('js', new Date());
-        gtag('config', '{GA_ID}');
+        // Проверяем, чтобы не дублировать скрипты при перезагрузке страницы
+        if (!window.parent.document.getElementById('cookie-script-injected')) {
+            
+            // Внедряем Cookie Script в главное окно
+            var cookie = window.parent.document.createElement('script');
+            cookie.id = 'cookie-script-injected';
+            cookie.type = 'text/javascript';
+            cookie.src = 'https://cdn.cookie-script.com/s/fb18b16fd53e6b7cda3eb0175ce0e0f5.js';
+            window.parent.document.head.appendChild(cookie);
+
+            // Внедряем Google Analytics в главное окно
+            var ga = window.parent.document.createElement('script');
+            ga.async = true;
+            ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-KZPZR173W4';
+            window.parent.document.head.appendChild(ga);
+
+            var gaInline = window.parent.document.createElement('script');
+            gaInline.innerHTML = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-KZPZR173W4');";
+            window.parent.document.head.appendChild(gaInline);
+        }
     </script>
     """
     
-    full_html = f"{cookie_script}\n{ga_script}"
-
-    components.html(full_html, height=0, width=0)
+    components.html(js_code, height=0, width=0)
 
     inject_analytics_and_cookies()
 st.title(":rat: Colloid Chat")
