@@ -13,25 +13,30 @@ import io
 from PIL import Image
 from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
 import streamlit as st
-import streamlit.components.v1 as components
+import requests
+import uuid
 
 def init_analytics_and_cookies():
-    GA_ID = "G-KZPZR173W4" 
-    ga_script = f"""
-    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){{dataLayer.push(arguments);}}
-        gtag('js', new Date());
-        
-        // Магический трюк: заставляем Гугл смотреть на главный сайт, а не внутрь песочницы
-        gtag('config', '{GA_ID}', {{
-            'page_location': window.parent.location.href,
-            'page_title': window.parent.document.title
-        }});
-    </script>
-    """
-    components.html(ga_script, height=0, width=0)
+    GA_ID = "G-KZPZR173W4"
+    API_SECRET = "RNpQHhUDR_aicfXGe-GA1w" 
+    
+    if "user_id" not in st.session_state:
+        st.session_state.user_id = str(uuid.uuid4())
+    
+        try:
+            url = f"https://www.google-analytics.com/mp/collect?measurement_id={GA_ID}&api_secret={API_SECRET}"
+            payload = {
+                "client_id": st.session_state.user_id,
+                "events": [{
+                    "name": "page_view",
+                    "params": {
+                        "page_title": "Colloid AI",
+                        "session_id": st.session_state.user_id
+                    }
+                }]
+            }
+            requests.post(url, json=payload, timeout=2)
+        except Exception:
 
     if "cookies_accepted" not in st.session_state:
         st.session_state.cookies_accepted = False
