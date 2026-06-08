@@ -12,38 +12,40 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import io
 from PIL import Image
 from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
+import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Colloid AI", page_icon=":rat:")
-def inject_analytics_and_cookies():
-    js_code = """
+def init_analytics_and_cookies():
+    GA_ID = "G-KZPZR173W4" 
+    ga_script = f"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
     <script>
-        // Проверяем, чтобы не дублировать скрипты при перезагрузке страницы
-        if (!window.parent.document.getElementById('cookie-script-injected')) {
-            
-            // Внедряем Cookie Script в главное окно
-            var cookie = window.parent.document.createElement('script');
-            cookie.id = 'cookie-script-injected';
-            cookie.type = 'text/javascript';
-            cookie.src = 'https://cdn.cookie-script.com/s/fb18b16fd53e6b7cda3eb0175ce0e0f5.js';
-            window.parent.document.head.appendChild(cookie);
-
-            // Внедряем Google Analytics в главное окно
-            var ga = window.parent.document.createElement('script');
-            ga.async = true;
-            ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-KZPZR173W4';
-            window.parent.document.head.appendChild(ga);
-
-            var gaInline = window.parent.document.createElement('script');
-            gaInline.innerHTML = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-KZPZR173W4');";
-            window.parent.document.head.appendChild(gaInline);
-        }
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){{dataLayer.push(arguments);}}
+        gtag('js', new Date());
+        gtag('config', '{GA_ID}');
     </script>
     """
-    
-    components.html(js_code, height=0, width=0)
+    components.html(ga_script, height=0, width=0)
 
-    inject_analytics_and_cookies()
+    if "cookies_accepted" not in st.session_state:
+        st.session_state.cookies_accepted = False
+
+    if not st.session_state.cookies_accepted:
+        with st.container(border=True):
+            col1, col2 = st.columns([4, 1], vertical_alignment="center")
+            with col1:
+                st.markdown(
+                    "🍪 **Colloid использует файлы cookie** для сбора аналитики и улучшения "
+                    "работы ИИ. Нажимая кнопку «Принять», вы соглашаетесь с этим согласно правилам GDPR."
+                )
+            with col2:
+                if st.button("Принять", type="primary", use_container_width=True):
+                    st.session_state.cookies_accepted = True
+                    st.rerun() 
+
+init_analytics_and_cookies()
 st.title(":rat: Colloid Chat")
 uploaded_file = st.sidebar.file_uploader("📎 Загрузить документ", type=["txt", "pdf"])
 extracted_text = ""
