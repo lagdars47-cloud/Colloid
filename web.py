@@ -59,6 +59,10 @@ if not st.session_state.is_logged_in:
                         st.success("Успешно! Теперь перейдите на вкладку (Вход) и введите свои данные.")
                     else:
                         st.error("Пожалуйста, заполните все поля.")
+
+
+
+st.stop()
         
 def init_analytics_and_cookies():
     GA_ID = "G-KZPZR173W4"
