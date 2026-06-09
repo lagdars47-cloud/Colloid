@@ -48,7 +48,7 @@ if not st.session_state.is_logged_in:
                 reg_name = st.text_input("Как вас зовут?")
                 reg_email = st.text_input("Email")
                 reg_password = st.text_input("Придумайте пароль", type="password")
-                submit_reg = st.form_submit_button("Зарегистрироваться", type="primary", use_container_with=True)
+                submit_reg = st.form_submit_button("Зарегистрироваться", type="primary", use_container_width=True)
 
                 if submit_reg:
                     if reg_email in st.session_state.user_db:
