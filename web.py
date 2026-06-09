@@ -17,16 +17,16 @@ import requests
 import uuid
 
 def send_telegram_notification(name, email, action):
-    BOT_TOKEN = "8804578335:AAHiNDavPgGbRzUS_d2FdeK0dYoktOW1gP0"
+    BOT_TOKEN = "8804578335:AAHiNDavPgGbRzUS_d2FdeK0dY0ktOW1gP0"
     CHAT_ID = "1192264841"
-
-text = f"🔔 {action} на Colloid!\n👤 Имя: {name}\n📧 Email: {email}"
-url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-
-try:
-    requests.post(url, data={"chat_id": CHAT_ID, "text": text}, timeout=3)
-except Exception:
-    pass
+    
+    text = f"🔔 {action} на Colloid!\n👤 Имя: {name}\n📧 Email: {email}"
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    
+    try:
+        requests.post(url, data={"chat_id": CHAT_ID, "text": text}, timeout=3)
+    except Exception:
+        pass
     
 if  "user_db" not in st.session_state:
     st.session_state.user_db = {"admin@colloid.com": "123456"}
