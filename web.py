@@ -22,8 +22,9 @@ def send_telegram_notification(name, email, action):
 
 text = f"🔔 {action} на Colloid!\n👤 Имя: {name}\n📧 Email: {email}"
 url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
 try:
-    requests.post(url, data={"chat_id": CHAID_ID, "text": text}, timeout=3)
+    requests.post(url, data={"chat_id": CHAT_ID, "text": text}, timeout=3)
 except Exception:
     pass
     
