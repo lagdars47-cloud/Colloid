@@ -16,6 +16,40 @@ import streamlit as st
 import requests
 import uuid
 
+if  "user_db" not in st.session_state:
+    st.session_state.user_db = {"admin@colloid.com": "123456"}
+
+if "is_logged_in" not in st.session_state:
+    st.session_state.is_logged_in = False
+
+if not st.session_state.is_logged_in:
+    st.title("🔒 Вход в Colloid")
+    st.info("Пожалуйста, войдите или зарегистрируйтесь.")
+
+    with st.container(border=True):
+        tag_login, tab_reg = st.tabs(["🔑 Вход", "📝 Регистрация"])
+
+        with tab_login:
+            with st.form("login_form"):
+                log_email = st.text_input("Ваш Email")
+                log_password = st.text_input("Пароль", type="password")
+                submit_login = st.form_submit_button("Войти", type="primary", use_container_width=True)
+
+                if submit_login:
+                    if log_email in st.session_state.user_db and st.session_state.user_db[log_email] == log_password:
+                        send_telegram_notification("Пользователь", log_email, "Успешный вход")
+                        st.session_state.is_logged_in = True
+                        st.rerun()
+                    else:
+                         st.error("Неверный Email или пароль. Возможно, вы не зарегистрированы?")
+                                 
+        with tab_reg:
+            with st.form("reg_form"):
+                reg_name = st.text_input("Как вас зовут?")
+                reg_email = st.text_input("Email")
+                reg_password = st.text_input("Придумайте пароль", type="password")
+                submit_reg = st.form_submit_button("Зарегистрироваться", type="primary", use_container_with=True)
+        
 def init_analytics_and_cookies():
     GA_ID = "G-KZPZR173W4"
     API_SECRET = "RNpQHhUDR_aicfXGe-GA1w" 
