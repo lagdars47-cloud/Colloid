@@ -49,6 +49,16 @@ if not st.session_state.is_logged_in:
                 reg_email = st.text_input("Email")
                 reg_password = st.text_input("Придумайте пароль", type="password")
                 submit_reg = st.form_submit_button("Зарегистрироваться", type="primary", use_container_with=True)
+
+                if submit_reg:
+                    if reg_email in st.session_state.user_db:
+                        st.warning("Этот Email уже зарегистрирован! Перейдите на вкладку (Вход).")
+                    elif reg_name and reg_emeil and reg_password:
+                        st.session_state.user_db[reg_email] = reg_password
+                        send_telegram_notification(reg_name, reg_email, "Новая регистрация")
+                        st.success("Успешно! Теперь перейдите на вкладку (Вход) и введите свои данные.")
+                    else:
+                        st.error("Пожалуйста, заполните все поля.")
         
 def init_analytics_and_cookies():
     GA_ID = "G-KZPZR173W4"
