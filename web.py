@@ -27,7 +27,7 @@ if not st.session_state.is_logged_in:
     st.info("Пожалуйста, войдите или зарегистрируйтесь.")
 
     with st.container(border=True):
-        tag_login, tab_reg = st.tabs(["🔑 Вход", "📝 Регистрация"])
+        tab_login, tab_reg = st.tabs(["🔑 Вход", "📝 Регистрация"])
 
         with tab_login:
             with st.form("login_form"):
