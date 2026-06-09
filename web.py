@@ -65,7 +65,7 @@ if not st.session_state.is_logged_in:
                 if submit_reg:
                     if reg_email in st.session_state.user_db:
                         st.warning("Этот Email уже зарегистрирован! Перейдите на вкладку (Вход).")
-                    elif reg_name and reg_emeil and reg_password:
+                    elif reg_name and reg_email and reg_password:
                         st.session_state.user_db[reg_email] = reg_password
                         send_telegram_notification(reg_name, reg_email, "Новая регистрация")
                         st.success("Успешно! Теперь перейдите на вкладку (Вход) и введите свои данные.")
