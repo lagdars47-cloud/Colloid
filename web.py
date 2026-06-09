@@ -74,7 +74,7 @@ if not st.session_state.is_logged_in:
 
 
 
-st.stop()
+    st.stop()
         
 def init_analytics_and_cookies():
     GA_ID = "G-KZPZR173W4"
