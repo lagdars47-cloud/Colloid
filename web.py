@@ -16,7 +16,7 @@ import streamlit as st
 import requests
 import uuid
 import speech_recognition as sr
-from streanlit_mic_recorder import mic_recorder
+from streamlit_mic_recorder import mic_recorder
 import streamlit as st
 
 if "user_query" not in st.session_state:
