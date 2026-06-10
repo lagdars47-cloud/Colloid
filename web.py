@@ -18,6 +18,7 @@ import uuid
 import speech_recognition as sr
 from streamlit_mic_recorder import mic_recorder
 import streamlit as st
+from pydub import AudioSegment
 
 if "user_query" not in st.session_state:
     st.session_state.user_query = ""
@@ -48,9 +49,13 @@ if audio_record:
     audio_bytes = audio_record['bytes']
     with st.spinner("Слушаю..."):
         try:
+            audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
+            wav_io = io.BytesIO()
+            audio_segment.export(wav_io, format="wav")
+            wav_io.seek(0)
+
             recognizer = sr.Recognizer()
-            audio_file = io.BytesIO(audio_bytes)
-            with sr.AudioFile(audio_file) as source:
+            with sr.AudioFile(wav_io) as source:
                 audio_data = recognizer.record(source)
 
             recognized_text = recognizer.recognize_google(audio_data, language='ru-RU')
