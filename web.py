@@ -35,15 +35,16 @@ with input_container:
             label_visibility="collapsed",
             key="text_input_field"
         )
-    with col_mic:
 
+    with col_mic:
         audio_record = mic_recorder(
             start_prompt="🎙️",
             stop_prompt="🛑",
+            format="wav",
             key='chat_recorder',
             use_container_width=True
         )
-
+        
 if audio_record:
     audio_bytes = audio_record['bytes']
     with st.spinner("Слушаю..."):
