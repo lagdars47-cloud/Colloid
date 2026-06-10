@@ -18,7 +18,6 @@ import uuid
 import speech_recognition as sr
 from streamlit_mic_recorder import mic_recorder
 import streamlit as st
-from pydub import AudioSegment
 
 if "user_query" not in st.session_state:
     st.session_state.user_query = ""
