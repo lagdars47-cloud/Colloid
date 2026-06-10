@@ -28,7 +28,7 @@ with input_container:
     col_text, col_mic = st.columns([9, 1])
 
     with col_text:
-        user_text_inout = st.text.input(
+        user_text_input = st.text.input(
             label="Placeholder",
             placehoder="Спроси меня о чем угодно...",
             value=st.session_state.user_query,
