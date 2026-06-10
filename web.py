@@ -49,19 +49,10 @@ if audio_record:
     audio_bytes = audio_record['bytes']
     with st.spinner("Слушаю..."):
         try:
-            import wave
-            
-            wav_io = io.BytesIO()
-            with wave.open(wav_io, "wb") as wav_file:
-                wav_file.setnchannels(1)
-                wav_file.setsampwidth(2)
-                wav_file.setframerate(16000)
-                wav_file.writeframes(audio_bytes)
-            
-            wav_io.seek(0)
-
             recognizer = sr.Recognizer()
-            with sr.AudioFile(wav_io) as source:
+            audio_file = io.BytesIO(audio_bytes)
+            
+            with sr.AudioFile(audio_file) as source:
                 audio_data = recognizer.record(source)
 
             recognized_text = recognizer.recognize_google(audio_data, language='ru-RU')
@@ -70,7 +61,7 @@ if audio_record:
             st.rerun()
 
         except sr.UnknownValueError:
-            st.toast("Не удалось разобрать речь🦜", icon="⚠️")
+            st.toast("Не удалось разобрать речь 🦜", icon="⚠️")
         except sr.RequestError:
             st.toast("Проблема с сервисом распознавания", icon="❌")
 
