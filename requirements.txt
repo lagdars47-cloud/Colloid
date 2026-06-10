@@ -9,3 +9,6 @@ duckduckgo-search
 # force update
 PyPDF2
 langchain-google-genai
+streamlit-mic-recorder
+SpeechRecognition
+pydub
