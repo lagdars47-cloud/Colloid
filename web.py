@@ -42,7 +42,7 @@ with input_container:
             start_prompt="🎙️",
             stop_prompt="🛑",
             key='chat_recorder',
-            use_container_ width=True
+            use_container_width=True
         )
 
 if audio_record:
