@@ -12,4 +12,3 @@ langchain-google-genai
 streamlit-mic-recorder
 SpeechRecognition
 pydub
-ffmpeg
