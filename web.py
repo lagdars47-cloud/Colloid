@@ -30,12 +30,11 @@ with input_container:
     with col_text:
         user_text_input = st.text_input(
             label="Placeholder",
-            placehoder="Спроси меня о чем угодно...",
+            placeholder="Спроси меня о чем угодно...",
             value=st.session_state.user_query,
             label_visibility="collapsed",
             key="text_input_field"
         )
-
     with col_mic:
 
         audio_record = mic_recorder(
@@ -67,7 +66,7 @@ if audio_record:
 final_query = st.session_state.user_query if st.session_state.user_query else user_text_input
 
 if final_query:
-    st,write(f"**Запрос для Colloid AI:** {final_query}")
+    st.write(f"**Запрос для Colloid AI:** {final_query}")
 
 
     st.session_state.user_query = ""
