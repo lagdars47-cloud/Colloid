@@ -25,7 +25,7 @@ if "user_query" not in st.session_state:
 input_container = st.container()
 
 with input_container:
-    col_text, col_mic = st.colums([9, 1])
+    col_text, col_mic = st.columns([9, 1])
 
     with col_text:
         user_text_inout = st.text.input(
