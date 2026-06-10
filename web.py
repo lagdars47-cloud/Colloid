@@ -15,6 +15,64 @@ from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlo
 import streamlit as st
 import requests
 import uuid
+import speech_recognition as sr
+from streanlit_mic_recorder import mic_recorder
+import streamlit as st
+
+if "user_query" not in st.session_state:
+    st.session_state.user_query = ""
+
+input_container = st.container()
+
+with input_container:
+    col_text, col_mic = st.colums([9, 1])
+
+    with col_text:
+        user_text_inout = st.text.input(
+            label="Placeholder",
+            placehoder="Спроси меня о чем угодно...",
+            value=st.session_state.user_query,
+            label_visibility="collapsed",
+            key="text_input_field"
+        )
+
+    with col_mic:
+
+        audio_record = mic_recorder(
+            start_prompt="🎙️",
+            stop_prompt="🛑",
+            key='chat_recorder',
+            use_container_ width=True
+        )
+
+if audio_record:
+    audio_bytes = audio_record['bytes']
+    with st.spinner("Слушаю..."):
+        try:
+            recognizer = sr.Recognizer()
+            audio_file = io.BytesIO(audio_bytes)
+            with sr.AudioFile(audio_file) as source:
+                audio_data = recognizer.record(source)
+
+            recognized_text = recognizer.recognize_google(audio_data, language='ru-RU')
+            
+            st.session_state.user_query = recognized_text
+            st.rerun()
+
+        except sr.UnknownValueError:
+            st.toast("Не удалось разобрать речь🦜", icon="⚠️")
+        except sr.RequestError:
+            st.toast("Проблема с сервисом распознавания", icon="❌")
+
+final_query = st.session_state.user_query if st.session_state.user_query else user_text_input
+
+if final_query:
+    st,write(f"**Запрос для Colloid AI:** {final_query}")
+
+
+    st.session_state.user_query = ""
+             
+    
 
 def send_telegram_notification(name, email, action):
     BOT_TOKEN = "8804578335:AAHiNDavPgGbRzUS_d2FdeK0dY0ktOW1gP0"
