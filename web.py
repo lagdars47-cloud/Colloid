@@ -49,9 +49,15 @@ if audio_record:
     audio_bytes = audio_record['bytes']
     with st.spinner("Слушаю..."):
         try:
-            audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
+            import wave
+            
             wav_io = io.BytesIO()
-            audio_segment.export(wav_io, format="wav")
+            with wave.open(wav_io, "wb") as wav_file:
+                wav_file.setnchannels(1)
+                wav_file.setsampwidth(2)
+                wav_file.setframerate(16000)
+                wav_file.writeframes(audio_bytes)
+            
             wav_io.seek(0)
 
             recognizer = sr.Recognizer()
